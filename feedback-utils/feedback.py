@@ -15,15 +15,18 @@ CODE BLOCKS OF student
 
 """
 
-RE_PATTERN = re.compile('^#--(\d|[a-zA-Z]+)_(\d{1,2})(.*?)#--END', flags = re.MULTILINE | re.DOTALL )
+# Python/C style comments files, where '' is most likely a makefile
+PY_EXT = ('py', '', 'in', 'pyc', 'make')
+C_EXT = ('h', 'hpp', 'c', 'cpp')
 
+PY_RE_PATTERN = re.compile('^#--(\d|[a-zA-Z]+)_(\d{1,2})(.*?)#--END', flags = re.MULTILINE | re.DOTALL )
+C_RE_PATTERN = re.compile('^//--(\d|[a-zA-Z]+)_(\d{1,2})(.*?)//--END', flags = re.MULTILINE | re.DOTALL )
 CAT_MAP = {
           '1'         : 'syntax',
           '2'         : 'style',
           '3'         : 'function',
           '4'         : 'misc',
           }
-
 PCT_MAP = {
           'syntax'    : .1,
           'style'     : .3,
@@ -52,37 +55,59 @@ def initDict():
   return dct
 
 
-def parseFile(root, file_name, ss, total_deduction):
+def parseFile(root, file_name, ss, total_deduction, is_python):
   path = os.path.join(root, file_name)
   with open(path) as f:
     file_content = f.read() # in-memory, to use regex findall
-  m = re.findall(RE_PATTERN, file_content)
+  if is_python:
+    comment_style = '#'
+    m = re.findall(PY_RE_PATTERN, file_content)
+  else:
+    comment_style = '//'
+    m = re.findall(C_RE_PATTERN, file_content)
   if m is not None and len(m) != 0:
     for comment in m:
       cat = comment[0].strip().lower()
       points = int(comment[1].strip())
 
       has_code = True
-      if not '#--START' in comment[2]:
+      if not comment_style+'--START' in comment[2]:
         print('Warning: no start codon for referencing code block in file {0}'.format(file_name))
         comments = comment[2]
         has_code = False
       else:
-        comments, code_block = comment[2].split('#--START')
-      comments = [line[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith('#--')]
+        comments, code_block = comment[2].split(comment_style+'--START')
+      comments = [line[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
       if cat not in CAT_MAP.values():
         cat = CAT_MAP.get(cat,'misc') #default value is misc
       ss.write('{0:<15}{1}\n{2:<15}{3}\n"{4}"\nCODE:\n...{5}\n--------------------------\n\n'.format('FILE:',file_name, 'CATEGORY:',cat, ('\n').join(comments),code_block))
       total_deduction[cat] += points
   return total_deduction
-
       
 
 def gradeStudent(student_repo_path, ss):
   total_deduction = initDict()
   for root, dirnames, filenames in os.walk(student_repo_path):
       for filename in filenames:
-        total_deduction = parseFile(root, filename, ss, total_deduction)
+        if not '.' in filename:
+          filename = filename+'.'
+        file_extension = filename.lower().split('.')[-1]
+        if file_extension in C_EXT:
+          total_deduction = parseFile(root, filename, ss, total_deduction, is_python = False)
+        elif file_extension in PY_EXT:
+          total_deduction = parseFile(root, filename, ss, total_deduction, is_python = True)
+        else:
+          while(True):
+            file_ext = input('File ext. {0} unknown. Enter "py"/"c" or blank: '.format(filename))
+            if file_ext.strip() == '':
+              print('skipping file...')
+              break
+            if file_ext.strip().lower() == 'py':
+              total_deduction = parseFile(root, filename, ss, total_deduction, is_python = True)
+              break
+            elif file_ext.strip().lower() == 'c':
+              total_deduction = parseFile(root, filename, ss, total_deduction, is_python = False)
+              break
   
   # Cap at 100 max
   cat_list = total_deduction.keys()
@@ -125,13 +150,18 @@ def main(argv=sys.argv):
 
   is_global = params['global']
   repo_path = params['repo_path']
+  root_path = params['root_path']
   file_name = params['file_name']
-  roster = params['roster']
+  students = params['roster']
+  print(os.path.join(root_path,students))
   if is_global:
     try:
-      students = open(roster)
+      students = open(os.path.join(root_path,students))
     except:
-      print('File I/O error. Is the file {0} in this dir?'.format(roster))
+      print('File I/O error. Is the file {0} in the correct dir?'.format(students))
+      if student_repo_name is not None:
+        print('Writing feedback for one student\'s only...\n')
+      is_global = False
   elif student_repo_name is None:
     print('One students\' repo feedback generation, but no student\'s repo name arg passed.')
     return 1
@@ -139,18 +169,20 @@ def main(argv=sys.argv):
 
   if not is_global:
     ss = StringStream()
-    print('\nWriting feedback file in repo: {0}'.format(student_repo_name))
+    print('...repo: {0}'.format(student_repo_name))
     student_repo_path = os.path.join(repo_path, student_repo_name)
     gradeStudent(student_repo_path, ss)
     saveFile(student_repo_path, ss, file_name)
-  else:    
+  else:
     for student in students:
-      print('\nWriting feedback file for student {0}'.format(student))
+      student = student.strip()
+      print('...repo: {0}'.format(student))
       ss = StringStream()
       student_repo_path = os.path.join(repo_path, student+'-submit')
       gradeStudent(student_repo_path, ss)
-      saveFile(student_repo_path, ss, file_name)      
-      student = student.strip()
+      saveFile(student_repo_path, ss, file_name) 
+      print('...done!')     
+  print('...finished!')
 
 
 

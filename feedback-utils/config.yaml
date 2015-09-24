@@ -2,11 +2,12 @@
 file_name: feedback.txt
 
 # Path to directory where repositories will be cloned 
-repo_path: /Users/loekjanssen/git/utilities/feedback-utils/testrepo
-# /afs/ir/class/cme211/git/repos  
+repo_path: /afs/ir/class/cme211/git/repos  
+
+root_path: /afs/ir/class/cme211/git/
 
 # If true, all the feedback of the repos will be generated, else only local.
-global: false
+global: true
 
 # Name of student roster file (one username per line)
-roster: students.txt
+roster: utilities/git-utils/students.txt

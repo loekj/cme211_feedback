@@ -1,0 +1,42 @@
+FILE:          test2.py
+CATEGORY:      syntax
+"very bad code because of
+the folowing
+here it is:"
+CODE:
+...
+from blah import chico #i imported this as a student
+from noway import madre
+for 5 in xrange(2):
+	print('bummers')
+
+--------------------------
+
+FILE:          testfile.py
+CATEGORY:      misc
+"This is just very bad code dude
+You know why? Chec this out:"
+CODE:
+...
+import scipy.sparse as sp
+A = sp.csc_matrix(A)
+
+--------------------------
+
+FILE:          testfile.py
+CATEGORY:      syntax
+"very bad code because of
+the folowing
+here it is:"
+CODE:
+...
+Ax = A.data    # Matrix entries
+Ap = A.indptr  # Size of Ap = size of matrix
+
+--------------------------
+
+FUNCTION:              100          WEIGHT=0.5
+STYLE:                 100          WEIGHT=0.3
+MISC:                   93          WEIGHT=0.1
+SYNTAX:                 96          WEIGHT=0.1
+TOTAL POINTS:           98.9

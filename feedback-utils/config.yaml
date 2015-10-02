@@ -1,13 +1,14 @@
-# Feedback file name
-file_name: feedback.txt
-
 # Path to directory where repositories will be cloned 
-repo_path: /afs/ir/class/cme211/git/repos  
+repo_path: /afs/ir/class/cme211/git/repos/
 
+# Root path of all git related stuff
 root_path: /afs/ir/class/cme211/git/
+
+# Hw to be graded
+hw_dir: hw1/
 
 # If true, all the feedback of the repos will be generated, else only local.
 global: true
 
-# Name of student roster file (one username per line)
-roster: utilities/git-utils/students.txt
+# Name of student-git map file
+map_git: /afs/ir/class/cme211/git/repos/SU2Git.yaml

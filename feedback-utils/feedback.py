@@ -131,12 +131,11 @@ def saveFile(student_repo_path, ss, file_name):
 
 
 def main(argv=sys.argv):
+  sunet_id = None
   student_repo_name = None
   if len(sys.argv) < 2:
-    print ('Usage:\n\t {0} <config file> [optional] <student git name>'.format(sys.argv[0]))
+    print ('Usage:\n\t {0} <config file> [optional : <SUnetID>]'.format(sys.argv[0]))
     return 1
-  elif len(sys.argv) > 2:
-    student_repo_name = '{0}-submit'.format(sys.argv[2])
 
   configfile = sys.argv[1]
   try:
@@ -151,34 +150,45 @@ def main(argv=sys.argv):
   is_global = params['global']
   repo_path = params['repo_path']
   root_path = params['root_path']
-  file_name = params['file_name']
-  students = params['roster']
-  print(os.path.join(root_path,students))
+  map_students = params['map_git']
+  hw_dir = params['hw_dir']
   if is_global:
+    if len(sys.argv) > 2:
+      print('Global flag set, but single SUNETid passed')
+      return 1    
     try:
-      students = open(os.path.join(root_path,students))
+      students = yaml.load(open(map_students))
     except:
-      print('File I/O error. Is the file {0} in the correct dir?'.format(students))
-      if student_repo_name is not None:
-        print('Writing feedback for one student\'s only...\n')
-      is_global = False
-  elif student_repo_name is None:
-    print('One students\' repo feedback generation, but no student\'s repo name arg passed.')
+      print('File I/O error. Does the file {0} in the exist?'.format(map_students))
+      return 1
+  elif len(sys.argv) < 3:
+    print('Global flag false, but no student repo name arg passed.')
     return 1
+
+  if len(sys.argv) > 2:
+    sunet_id = sys.argv[2].strip()
+    try:
+      student_repo_name = '{0}-submit'.format(students[sunet_id])
+    except KeyError:
+      print('Wrong SUnetID passed maybe?')
+      return 1
 
 
   if not is_global:
+    if not os.path.exists(os.path.join(repo_path, student_repo_name)):
+      print('Path to repo does not exist')    
+
     ss = StringStream()
-    print('...repo: {0}'.format(student_repo_name))
-    student_repo_path = os.path.join(repo_path, student_repo_name)
+    file_name = 'feedback_'+sunet_id+'.txt'
+    student_repo_path = os.path.join(repo_path, student_repo_name, hw_dir)
     gradeStudent(student_repo_path, ss)
     saveFile(student_repo_path, ss, file_name)
   else:
-    for student in students:
-      student = student.strip()
-      print('...repo: {0}'.format(student))
+    for sunet, git in students.iteritems():
+      git = git.strip()
+      print('...repo: {0}-submit'.format(git))
       ss = StringStream()
-      student_repo_path = os.path.join(repo_path, student+'-submit')
+      student_repo_path = os.path.join(repo_path, git+'-submit', hw_dir)
       gradeStudent(student_repo_path, ss)
       saveFile(student_repo_path, ss, file_name) 
       print('...done!')     

@@ -16,7 +16,7 @@ relevant code block
 ```
 
 For example, in a my_script.cpp file I can have the following:<br>
-'''
+```
 //--style_4
 //--Try to be consistent with the brackets
 //--Either after a statement or on the newline but don't mix!
@@ -25,10 +25,10 @@ if (*it != "my_str") {
   // do something
 }
 //--END
-'''
+```
 
 In the outputted feedback file it will put a block like so:
-'''
+```
 FILE:           my_script.cpp
 STYLE:          -4
 Try to be consistent with the brackets
@@ -38,7 +38,7 @@ CODE:
 if (*it != "my_str") {
   // do something
 }
-'''
+```
 
 * For Python files, replace // with C&#35;
 * the category variable is user defined in the config.yaml file. It must be one of those categories, upper or lower case, If it is not one of the defined catgories, it will prompt the user for input.
@@ -65,7 +65,7 @@ It will also write a file with the student sunets and their scores, in /afs/ir/c
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):
 
 **template** (C style):
-'''
+```
 //--bonus_5
 //--comment line 1
 ..
@@ -73,7 +73,7 @@ If the assignment has a bonus part, you will have to manually add a bonus commen
 //--START
 relevant code block
 //--END
-'''
+```
 
 ## Remarks: WRITEUP
 To comment and grade the writeup, create a comment in the main script that gets executed again.

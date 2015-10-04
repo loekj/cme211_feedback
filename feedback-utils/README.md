@@ -5,10 +5,10 @@ A collection of useful scripts for feedback file generating.
 The script will automatically parse extensions .py and .pyc with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
 
 **template** (C style):
-//--[category]_[points deducted]
-//--comment line 1
-..
-//--comment line 4
+//--[category]_[points deducted]<br>
+//--comment line 1<br>
+..<br>
+//--comment line 4<br>
 //--START
 relevant code block 
 //--END

@@ -50,9 +50,9 @@ if (*it != "my_str") {
 ## Input
 *NOTE:* make sure a branch is created and is switched to that defines our grading branch!!
 run the script from the feedback-utils directory as:
-'''
+```
 ./python2.7 feedback.py config.yaml [optional : <SUnetID>]
-'''
+```
 The config.yaml file has a 'global' flag. If global is false, a SUnetID must be passed to the feedback file to generate one students' feedback (mainly for your own testing to see if the commenting you did is okay!). Otherwise, if global is true, just leave out the SUnetID argument.
 The categories parameter in the config.yaml file can be edited to contain the categories for the assignment that are being graded. After each category add a dash ('-') followed by the total points that can be earned in the assignment.
 

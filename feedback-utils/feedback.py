@@ -168,6 +168,9 @@ def main(argv=sys.argv):
     print('...done! {0} points: {1}/100\n'.format(sunet_id, student.getScore()))
   else:
     for student in assignment.getStudents():
+      if not os.path.exists(student.getPath()):
+        print('Warning: student repo of {0} does not exists!'.format(student.getSunet()))
+        continue
       print('...repo: {0}-submit'.format(student.getGit()))
       gradeStudent(assignment, student)
       student.saveFile() 

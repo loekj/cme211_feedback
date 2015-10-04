@@ -40,7 +40,7 @@ if (*it != "my_str") {
 }
 ```
 
-* For Python files, replace // with C&#35;
+* For Python files, replace // with &#35;
 * the category variable is user defined in the config.yaml file. It must be one of those categories, upper or lower case, If it is not one of the defined catgories, it will prompt the user for input.
 * Points deducted is a positive integer. If you just want to write a comment in the generated feedback file use 0 for points deducted
 * Each commentline will be a separate comment line in the feedback file. At least one comment line is required.

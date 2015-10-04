@@ -5,7 +5,7 @@ A collection of useful scripts for feedback file generating.
 The script will automatically parse extensions .py and .pyc with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
 
 **template** (C style):
-'''
+```
 //--[category]_[points deducted]
 //--comment line 1
 ..
@@ -13,7 +13,7 @@ The script will automatically parse extensions .py and .pyc with Python style co
 //--START
 relevant code block
 //--END
-'''
+```
 
 For example, in a my_script.cpp file I can have the following:<br>
 '''

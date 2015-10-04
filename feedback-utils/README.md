@@ -4,14 +4,41 @@ A collection of useful scripts for feedback file generating.
 ## How to use
 The script will automatically parse extensions .py and .pyc with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
 
-**template** (C style):<br>
-//--[category]_[points deducted]<br>
-//--comment line 1<br>
-..<br>
-//--comment line 4<br>
-//--START<br>
-relevant code block<br>
-//--END<br>
+**template** (C style):
+'''
+//--[category]_[points deducted]
+//--comment line 1
+..
+//--comment line 4
+//--START
+relevant code block
+//--END
+'''
+
+For example, in a my_script.cpp file I can have the following:<br>
+'''
+//--style_4
+//--Try to be consistent with the brackets
+//--Either after a statement or on the newline but don't mix!
+//--START
+if (*it != "my_str") {
+  // do something
+}
+//--END
+'''
+
+In the outputted feedback file it will put a block like so:
+'''
+FILE:           my_script.cpp
+STYLE:          -4
+Try to be consistent with the brackets
+Either after a statement or on the newline but don't mix!
+CODE:
+...
+if (*it != "my_str") {
+  // do something
+}
+'''
 
 * For Python files, replace // with C&#35;
 * the category variable is user defined in the config.yaml file. It must be one of those categories, upper or lower case, If it is not one of the defined catgories, it will prompt the user for input.
@@ -37,14 +64,16 @@ It will also write a file with the student sunets and their scores, in /afs/ir/c
 ## Remarks: BONUS
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):
 
-**template** (C style):<br>
-//--bonus_5<br>
-//--comment line 1<br>
-..<br>
-//--comment line 4<br>
-//--START<br>
-relevant code block<br>
-//--END<br>
+**template** (C style):
+'''
+//--bonus_5
+//--comment line 1
+..
+//--comment line 4
+//--START
+relevant code block
+//--END
+'''
 
 ## Remarks: WRITEUP
 To comment and grade the writeup, create a comment in the main script that gets executed again.

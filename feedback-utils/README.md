@@ -4,7 +4,7 @@ A collection of useful scripts for feedback file generating.
 ## How to use
 The script will automatically parse extensions .py and .pyc with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
 
-**template** (C style):
+**template** (C style):<br>
 //--[category]_[points deducted]<br>
 //--comment line 1<br>
 ..<br>
@@ -37,7 +37,7 @@ It will also write a file with the student sunets and their scores, in /afs/ir/c
 ## Remarks: BONUS
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):
 
-**template** (C style):
+**template** (C style):<br>
 //--bonus_5<br>
 //--comment line 1<br>
 ..<br>

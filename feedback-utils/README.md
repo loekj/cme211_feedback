@@ -61,12 +61,12 @@ If the global flag is true, the script will create a cumulative histogram of the
 It will also write a file with the student sunets and their scores, in /afs/ir/class/cme211/git/data/
 
 ## Running it
-When running the script it globs each students' repo and processes the files. Whenever it stumbles upon an unknown extension it will prompt the user to choose on of the following:
+When running the script, it globs each students' repo and processes the files. Whenever it stumbles upon an unknown extension it will prompt the user to choose one of the following options:
 * 'c' for c-style commenting
 * 'py' for python-style commenting
-* '' for skipping the file only once
+* '' for skipping the file
 * 'e' for skipping all files (globally) with this extension
-* 'f' for skipping all files (globally) with the same name _note:_ filename exclusively, any subdirectories not taken into account!
+* 'f' for skipping all files (globally) with the same file name _note:_ file name exclusively, any subdirectories not taken into account! Hence if there's a subdirectory with the same file name it will skip that one too.
 
 ## Remarks: BONUS
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):

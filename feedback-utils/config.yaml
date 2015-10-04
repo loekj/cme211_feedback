@@ -1,8 +1,8 @@
 # Path to directory where repositories will be cloned 
 repo_path: /afs/ir/class/cme211/git/repos/
 
-# Root path of all git related stuff
-root_path: /afs/ir/class/cme211/git/
+# Categories to grade, separated by a space
+categories: "functionality-40 style-20 design-30 writeup-10"
 
 # Hw to be graded
 hw_dir: hw1/

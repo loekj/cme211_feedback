@@ -76,7 +76,7 @@ relevant code block
 ```
 
 ## Remarks: WRITEUP
-To comment and grade the writeup, create a comment in the main script that gets executed again.
+To comment on parts of the writeup and deduct points, create a comment according to the template in the main script that gets executed. Just like you would do with the bonus.
 
 ## Remarks: GENERAL
 If for each category the points deducted surpasses the maximum points, it will be capped at 0 automatically and produces a warning message to stdout. You can ignore it if you intended to do so.

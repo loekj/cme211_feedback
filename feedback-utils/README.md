@@ -46,7 +46,6 @@ if (*it != "my_str") {
 * Each commentline will be a separate comment line in the feedback file. At least one comment line is required.
 * A code block is optional. You can leave out //--START. However, //--END is always required!!
 
-
 ## Input
 *NOTE:* make sure a branch is created and is switched to that defines our grading branch!!
 run the script from the feedback-utils directory as:
@@ -60,6 +59,14 @@ The categories parameter in the config.yaml file can be edited to contain the ca
 The feedback.py file will output a file in the students' corresponding hw directory; the file is called feedback_[SUnetID].txt
 If the global flag is true, the script will create a cumulative histogram of the total scores and writes it to /afs/ir/class/cme211/git/figs/
 It will also write a file with the student sunets and their scores, in /afs/ir/class/cme211/git/data/
+
+## Running it
+When running the script it globs each students' repo and processes the files. Whenever it stumbles upon an unknown extension it will prompt the user to choose on of the following:
+* 'c' for c-style commenting
+* 'py' for python-style commenting
+* '' for skipping the file only once
+* 'e' for skipping all files (globally) with this extension
+* 'f' for skipping all files (globally) with the same name _note:_ filename exclusively, any subdirectories not taken into account!
 
 ## Remarks: BONUS
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):

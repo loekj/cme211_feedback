@@ -139,13 +139,23 @@ def main(argv=sys.argv):
   repo_path = params['repo_path']
   map_students = params['map_git']
   hw_dir = params['hw_dir']
+  map_ta = params['map_ta']
   cat_map = dict([ (cat.split('-')[0], int(cat.split('-')[1])) for cat in params['categories'].split(' ')])
 
   # check if input args valid
   try:
+    with open(map_ta) as f:
+      map_ta_list = f.readlines()
+    except:
+      print('File I/O error. Does the file {0} the exist?'.format(map_ta))
+      return 1
+  ta_dict = dict( [ (ta.strip().split()[-1], []) for ta in map_ta_list] )
+  [ ta_dict[line.strip().split()[-1]].append(line.strip().split()[0]) for line in map_ta_list ]
+
+  try:
     students = yaml.load(open(map_students))
   except:
-    print('File I/O error. Does the file {0} in the exist?'.format(map_students))
+    print('File I/O error. Does the file {0} the exist?'.format(map_students))
     return 1
 
   if is_global:
@@ -157,7 +167,7 @@ def main(argv=sys.argv):
     return 1
 
   # set-up assignment class with students
-  assignment = Assignment(cat_map, students, hw_dir, repo_path)
+  assignment = Assignment(cat_map, ta_dict, students, hw_dir, repo_path)
   assignment.createStudents()
 
 

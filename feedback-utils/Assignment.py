@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from Student import Student
 
 class Assignment(object):
-  def __init__(self, category_map, student_git_map, hw_directory, repository_path):
+  def __init__(self, category_map, ta_dict, student_git_map, hw_directory, repository_path):
     self.category_map = category_map
     self.student_git_map = student_git_map
+    self.ta_dict = ta_dict
     self.students = []
     self.hw_dir = hw_directory
     self.repo_path = repository_path

@@ -14,18 +14,19 @@ class Student(object):
     self.total_score = 0
 
   def setScoreWrite(self, cat_map):
+    self.write('\n')
     for cat, val in self.points.iteritems():
       self.write('{0:<18}{1:>15}\n'.format(cat.upper()+':', str(val)+'/'+str(cat_map[cat])))
       self.total_score += val
     
     # Write Bonus
     if self.bonus != -1:
-      self.write('{0:<18}{1:>15}\n\n'.format('BONUS:', '+'+str(self.bonus)))
+      self.write('{0:<18}{1:>15}\n'.format('BONUS:', '+'+str(self.bonus)))
       self.total_score += self.bonus
       if self.total_score > 100:
         total_score = 100
 
-    self.write('{0:<18}{1:>15}'.format('TOTAL POINTS:',self.total_score))
+    self.write('{0:<18}{1:>15}\n'.format('TOTAL POINTS:',self.total_score))
 
   def getPath(self):
     return self.path

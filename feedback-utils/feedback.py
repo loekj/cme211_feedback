@@ -8,11 +8,11 @@ from Student import Student
 from Assignment import Assignment
 
 
-PY_EXT = ('py','pyc')
+PY_EXT = ('py')
 C_EXT = ('h', 'hpp', 'c', 'cpp')
 
-RE_PATTERN = '^{0}--([a-zA-Z]+)_(\d{{1,2}})(.*?){0}--END'
-RE_BONUS_PATTERN = '^{0}--(?:bonus|BONUS)_(\d{{1,2}})(.*?){0}--END'
+RE_PATTERN = '^\s*{0}--([a-zA-Z]+)_(\d{{1,2}})(.*?){0}--END'
+RE_BONUS_PATTERN = '^\s*{0}--(?:bonus|BONUS)_(\d{{1,2}})(.*?){0}--END'
 
 
 def parseFile(root, file_name, assignment, student, is_python):  
@@ -41,7 +41,7 @@ def parseFile(root, file_name, assignment, student, is_python):
     comments = [line[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
     comments = ['-'+line if not line.startswith('-') else line for line in comments]
     if has_code:
-      student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...{5}\n--------------------------\n\n'.format('FILE:',file_name, 'BONUS', '+'+str(points),('\n').join(comments),code_block))
+      student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}\n--------------------------\n\n'.format('FILE:',file_name, 'BONUS', '+'+str(points),('\n').join(comments),code_block.strip()))
     else:
       student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\n--------------------------\n\n'.format('FILE:',file_name, 'BONUS', '+'+str(points), ('\n').join(comments)))
     student.addBonus(points)
@@ -69,7 +69,7 @@ def parseFile(root, file_name, assignment, student, is_python):
             break
       if cat.lower() != 'bonus':
         if has_code:
-          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...{5}--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block))
+          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
         else:
           student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\n--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments)))
         student.subtract(cat, points)

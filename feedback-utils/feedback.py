@@ -180,6 +180,7 @@ def main(argv=sys.argv):
       gradeStudent(assignment, student)
       student.saveFile() 
       print('...done! {0} points: {1}/100\n'.format(student.getSunet(), student.getScore()))
+    assignment.checkExistsDirs()
     assignment.plotScoresDistr()
     assignment.writeScoresToFile()
     assignment.plotTADistr()

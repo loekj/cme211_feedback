@@ -8,18 +8,18 @@ import matplotlib.pyplot as plt
 from Student import Student
 
 class Assignment(object):
-  def __init__(self, category_map, ta_dict, student_git_map, hw_directory, repository_path):
+  def __init__(self, category_map, ta_dict, student_git_map, hw, repository_path, root_git):
     self.category_map = category_map
     self.cat_list = category_map.keys()
     self.student_git_map = student_git_map
     self.ta_dict = ta_dict
     self.students = []
-    self.hw_dir = hw_directory
+    self.hw = hw
     self.repo_path = repository_path
     self.skip_files = []
     self.skip_ext = []
-    self.git_root = self.setGitRoot()
-    self.ta_scores_list = []
+    self.git_root = root_git
+    self.ta_scores_list = []    
 
   def getCatMap(self):
     return self.category_map
@@ -39,12 +39,6 @@ class Assignment(object):
     else:
       return single_student
 
-  def getDir(self):
-    return self.hw_dir
-
-  def getRepoPath(self):
-    return self.repo_path
-
   def skipFile(self, filename):
     self.skip_files.append(filename)
 
@@ -57,37 +51,33 @@ class Assignment(object):
   def getSkipFiles(self):
     return self.skip_files 
 
+  def checkExistsDirs(self):
+    for directory in ['figs', 'data']:
+      for hw_dir in ['hw{0}'.format(str(ii)) for ii in range(1,7)]+['project']:
+        if not os.path.exists(os.path.join(self.git_root, directory, hw_dir)):
+          os.makedirs(os.path.join(self.git_root, directory, hw_dir))
+
+
   def checkStudentsExists(self):
     for sunet, git in self.student_git_map.iteritems():
       if not os.path.exists('{0}-submit'.format(os.path.join(self.repo_path, git))):
         print('Warning! {0} with repo {1}-submit/ does not seem to exist!'.format(sunet, git))
     print('\n')
 
-  def setGitRoot(self):
-    root_dir = self.repo_path
-    if root_dir.endswith('/'):
-      root_dir = root_dir[:-1]
-    root = os.path.split(root_dir)[0]+'/'
-    if not root.endswith('git/'):
-      print('Can\'t find root directory of AFS cme211/git/. Repos dir must be one level up from this')
-    return root
 
   def plotScoresDistr(self):
     total_scores = [int(student.getScore()) for student in self.students]
     plt.figure()
     plt.hist(total_scores, bins = len(total_scores), cumulative=True)
-    plt.title('Cumul. Distr. {0}'.format(self.hw_dir.replace('/','')))
+    plt.title('Cumul. Distr. {0}'.format(self.hw))
     plt.xlabel('Points')
     plt.ylabel('Students')
-    save_dir = '{0}{1}/{2}/'.format(self.git_root,'figs',self.hw_dir.replace('/',''))
-    plt.savefig(save_dir+'ScoresDistr.png')
+    plt.savefig( os.path.join(self.git_root, 'figs', self.hw, 'ScoresDistr.png') )
 
   def writeScoresToFile(self):
-    with open('{0}{1}/{2}/{3}'.format(self.git_root,'data',self.hw_dir.replace('/',''),'Scores.txt'), 'w') as f:
+    with open(os.path.join(self.git_root, 'data', self.hw,'Scores.txt'), 'w') as f:
       for student in self.students:
         f.write('{0}: {1}\n'.format(student.getSunet(), student.getScore()))
-
-
 
   def getScoresPerTa(self):
     ta_scores_dict = dict( [ (ta, map(lambda y: y.getPoints(), map(lambda x: self.getStudent(x), ta_list) ) ) for ta, ta_list in self.ta_dict.iteritems() ] ) 
@@ -97,7 +87,7 @@ class Assignment(object):
 
   def writeTADistr(self):
     ta_scores_dict = dict( [ (ta, map(lambda y: (y[0], y[1].getPoints()), map(lambda x: (x, self.getStudent(x)), ta_list) ) ) for ta, ta_list in self.ta_dict.iteritems() ] ) 
-    with open('{0}{1}/{2}/{3}'.format(self.git_root,'data',self.hw_dir.replace('/',''), 'TaScoresDistr.txt'), 'w') as f:
+    with open(os.path.join(self.git_root, 'data', self.hw, 'TaScoresDistr.txt'), 'w') as f:
       for ta, student in ta_scores_dict.iteritems():
         for sunet_id, student_points in student:
           points_string = ','.join( ['{0}-{1}/{2}'.format(cat, str(points), str(self.category_map[cat])) for cat, points in student_points.iteritems()] )
@@ -116,10 +106,7 @@ class Assignment(object):
     bar_list.append( plt.bar(idx, map(lambda x: x[2][-1], students_mean_std), width, color = color_iter.next(), bottom = map(lambda x: sum(x[2][:-1]), students_mean_std) ) )        
 
     plt.xticks(map(lambda x: x + (width / float(2)), idx), map(lambda x: x[0], students_mean_std))
-    plt.title('Score Distr. Per TA {0}'.format(self.hw_dir.replace('/','')))
+    plt.title('Score Distr. Per TA {0}'.format(self.hw))
     plt.ylabel('Mean Scores')
     plt.legend( map(lambda x: x[0], bar_list), cat_list )
-    save_dir = '{0}{1}/{2}/'.format(self.git_root,'figs',self.hw_dir.replace('/',''))
-    plt.savefig(save_dir+'TaScoresDistr.png')
-
-    
+    plt.savefig( os.path.join(self.git_root, 'figs', self.hw, 'TaScoresDistr.png' )

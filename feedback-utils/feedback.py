@@ -137,7 +137,6 @@ def main(argv=sys.argv):
   # get config yaml params
   is_global = params['global']
   repo_path = params['repo_path']
-  map_students = params['map_git']
   hw_dir = params['hw_dir']
   map_ta = params['map_ta']
   cat_map = dict([ (cat.split('-')[0], int(cat.split('-')[1])) for cat in params['categories'].split(' ')])
@@ -151,12 +150,7 @@ def main(argv=sys.argv):
       return 1
   ta_dict = dict( [ (ta.strip().split()[-1], []) for ta in map_ta_list] )
   [ ta_dict[line.strip().split()[-1]].append(line.strip().split()[0]) for line in map_ta_list ]
-
-  try:
-    students = yaml.load(open(map_students))
-  except:
-    print('File I/O error. Does the file {0} the exist?'.format(map_students))
-    return 1
+  sunet_to_git = dict( [ (line.strip().split()[0], line.strip().split()[1]) for line in map_ta_list ] )
 
   if is_global:
     if len(sys.argv) > 2:
@@ -167,7 +161,8 @@ def main(argv=sys.argv):
     return 1
 
   # set-up assignment class with students
-  assignment = Assignment(cat_map, ta_dict, students, hw_dir, repo_path)
+  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw_dir, repo_path)
+  assignment.checkStudentsExists()
   assignment.createStudents()
 
 
@@ -187,6 +182,8 @@ def main(argv=sys.argv):
       print('...done! {0} points: {1}/100\n'.format(student.getSunet(), student.getScore()))
     assignment.plotScoresDistr()
     assignment.writeScoresToFile()
+    assignment.plotTADistr()
+    assignment.writeTADistr()
   print('...finished!')
 
 

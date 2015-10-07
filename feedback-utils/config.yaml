@@ -10,8 +10,5 @@ hw_dir: hw1/
 # If true, all the feedback of the repos will be generated, else only local.
 global: true
 
-# Name of student-git map file
-map_git: /afs/ir/class/cme211/git/repos/SU2Git.yaml
-
 # Name of sunets-git-TA map file
 map_ta: /afs/ir/class/cme211/git/repos/TA_assignments.txt

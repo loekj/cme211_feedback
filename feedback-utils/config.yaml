@@ -12,3 +12,6 @@ global: true
 
 # Name of sunets-git-TA map file
 map_ta: /afs/ir/class/cme211/git/repos/TA_assignments.txt
+
+# Git root for creation of figs and data files
+root_git: /afs/ir/class/cme211/git/

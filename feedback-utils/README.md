@@ -1,9 +1,7 @@
 # CME211/212 Course Utilities
-A collection of useful scripts for feedback file generating.
+A collection of useful scripts for feedback file generating. The script will automatically parse extensions .py and with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
 
 ## How to use
-The script will automatically parse extensions .py and .pyc with Python style commenting. Likewise with C style commenting for extensions .h, .hpp, .c, .cpp
-
 **template** (C style):
 ```
 //--[category]_[points deducted]
@@ -41,24 +39,24 @@ if (*it != "my_str") {
 ```
 
 * For Python files, replace // with &#35;
-* the category variable is user defined in the config.yaml file. It must be one of those categories, upper or lower case, If it is not one of the defined catgories, it will prompt the user for input.
+* the category variable is user defined in the config.yaml file. In the commenting syntax, it must be one of those categories, upper or lower case, If it is not one of the defined categories, it will prompt the user for input.
 * Points deducted is a positive integer. If you just want to write a comment in the generated feedback file use 0 for points deducted
 * Each commentline will be a separate comment line in the feedback file. At least one comment line is required.
-* A code block is optional. You can leave out //--START. However, //--END is always required!!
+* A code block is optional. You can leave out //--START. However, __//--END is always required!!__
 
 ## Input
 *NOTE:* make sure a branch is created and is switched to that defines our grading branch!!
 run the script from the feedback-utils directory as:
 ```
-./python2.7 feedback.py config.yaml [optional : <SUnetID>]
+python2.7 feedback.py config.yaml [optional : <SUnetID>]
 ```
 The config.yaml file has a 'global' flag. If global is false, a SUnetID must be passed to the feedback file to generate one students' feedback (mainly for your own testing to see if the commenting you did is okay!). Otherwise, if global is true, just leave out the SUnetID argument.
 The categories parameter in the config.yaml file can be edited to contain the categories for the assignment that are being graded. After each category add a dash ('-') followed by the total points that can be earned in the assignment.
 
 ## Output
 The feedback.py file will output a file in the students' corresponding hw directory; the file is called feedback_[SUnetID].txt
-If the global flag is true, the script will create a cumulative histogram of the total scores and writes it to /afs/ir/class/cme211/git/figs/
-It will also write a file with the student sunets and their scores, in /afs/ir/class/cme211/git/data/
+If the global flag is true, the script will create cool plots and writes it to /afs/ir/class/cme211/git/figs/
+It will also write files to /afs/ir/class/cme211/git/data/
 
 ## Running it
 When running the script, it globs each students' repo and processes the files. Whenever it stumbles upon an unknown extension it will prompt the user to choose one of the following options:
@@ -67,6 +65,12 @@ When running the script, it globs each students' repo and processes the files. W
 * '' for skipping the file
 * 'e' for skipping all files (globally) with this extension
 * 'f' for skipping all files (globally) with the same file name _note:_ file name exclusively, any subdirectories not taken into account! Hence if there's a subdirectory with the same file name it will skip that one too.
+
+## Remarks: When Grading Not Submitted
+When you are grading and encounter a student that did not submit any code, make sure that the directory structure is as follows with their assignment in the predefined assignment directory (e.g. for hw2):
+[gitusername-submit]/hw2/
+That is, if they have their structure pushed to git like so: [gitusername-submit]/hw2/hw2/ but then have no actual files, **the script will fail!** and wil give the student a perfect score. So becareful with that! Make sure that if you encounter a student that has not submitted that the directory is clean (can contain the README.md and .DS_Store files, I ignore those anyway :) ) 
+
 
 ## Remarks: BONUS
 If the assignment has a bonus part, you will have to manually add a bonus comment section yourself in one of the files that will be parsed (good style is to write it in the main script that gets executed). The script will search for any comment tags with bonus as category and parses it seperately. E.g. if there's a bonus part add the following, where the positive integer in this case will be added to the total score (instead of deducted):

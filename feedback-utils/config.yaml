@@ -1,11 +1,11 @@
-# Path to directory where repositories will be cloned 
+# Path to directory where repositories will be cloned to
 repo_path: /afs/ir/class/cme211/git/repos/
 
 # Categories to grade, separated by a space
-categories: "functionality-40 style-20 design-30 writeup-10"
+categories: "functionality-70 style-10 writeup-20"
 
 # Hw to be graded
-hw_dir: hw1/
+hw: hw2
 
 # If true, all the feedback of the repos will be generated, else only local.
 global: true

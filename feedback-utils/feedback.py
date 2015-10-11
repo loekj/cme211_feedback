@@ -63,13 +63,13 @@ def parseFile(root, file_name, assignment, student, is_python):
       cat_list = assignment.getCatMap().keys()
       if cat.lower() != 'bonus' and cat not in cat_list:
         while(True):
-          cat_in = input('Category {0} unknown, type one of the categories: {1}'.format(cat, " ".join(cat_list)))
+          cat_in = raw_input('Category \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
           if cat_in.strip() in cat_list:
             cat = cat_in.strip()
             break
       if cat.lower() != 'bonus':
         if has_code:
-          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
+          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}\n--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
         else:
           student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\n--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments)))
         student.subtract(cat, points)
@@ -91,7 +91,7 @@ def gradeStudent(assignment, student):
           continue
         else:
           while(is_python is None):
-            file_ext = input('Unknown type {0}. \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename))
+            file_ext = raw_input('Unknown type {0}. \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
@@ -137,17 +137,20 @@ def main(argv=sys.argv):
   # get config yaml params
   is_global = params['global']
   repo_path = params['repo_path']
-  hw_dir = params['hw_dir']
+  hw = params['hw']
   map_ta = params['map_ta']
+  root_git = params['root_git']
+
+  # parse categories to dict such that categories: max points are key value pairs
   cat_map = dict([ (cat.split('-')[0], int(cat.split('-')[1])) for cat in params['categories'].split(' ')])
 
   # check if input args valid
   try:
     with open(map_ta) as f:
       map_ta_list = f.readlines()
-    except:
-      print('File I/O error. Does the file {0} the exist?'.format(map_ta))
-      return 1
+  except:
+    print('File I/O error. Does the file {0} the exist?'.format(map_ta))
+    return 1
   ta_dict = dict( [ (ta.strip().split()[-1], []) for ta in map_ta_list] )
   [ ta_dict[line.strip().split()[-1]].append(line.strip().split()[0]) for line in map_ta_list ]
   sunet_to_git = dict( [ (line.strip().split()[0], line.strip().split()[1]) for line in map_ta_list ] )
@@ -161,10 +164,13 @@ def main(argv=sys.argv):
     return 1
 
   # set-up assignment class with students
-  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw_dir, repo_path)
-  assignment.checkStudentsExists()
+  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw, repo_path, root_git)
+
+  # create student objects and store them in assignement object
   assignment.createStudents()
 
+  # check whether students repo path exists, and whether they have submitted (also need manual precheck)
+  assignment.checkStudents()
 
   if not is_global:
     student = assignment.getStudent(sunet_id)
@@ -173,18 +179,26 @@ def main(argv=sys.argv):
     print('...done! {0} points: {1}/100\n'.format(sunet_id, student.getScore()))
   else:
     for student in assignment.getStudents():
-      if not os.path.exists(student.getPath()):
-        print('Warning: student repo of {0} does not exists!'.format(student.getSunet()))
+      if (student.getSunet() in assignment.getNotExists()) or (student.getSunet() in assignment.getNotSubmitted()):
         continue
-      print('...repo: {0}-submit'.format(student.getGit()))
+      print('...repo: {0}'.format(student.getSunet()))
       gradeStudent(assignment, student)
       student.saveFile() 
       print('...done! {0} points: {1}/100\n'.format(student.getSunet(), student.getScore()))
+
+    # checks whether /data/* and /figs/* exists, otherwise creates it
     assignment.checkExistsDirs()
+
+    # make plots
     assignment.plotScoresDistr()
-    assignment.writeScoresToFile()
     assignment.plotTADistr()
+    
+    # write to files
+    assignment.writeScoresToFile()
     assignment.writeTADistr()
+
+    # print summary to stdout
+    assignment.printOutput()
   print('...finished!')
 
 

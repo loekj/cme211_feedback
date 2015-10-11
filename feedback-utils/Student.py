@@ -21,7 +21,7 @@ class Student(object):
     
     # Write Bonus
     if self.bonus != -1:
-      self.write('{0:<18}{1:>15}\n'.format('BONUS:', '+'+str(self.bonus)))
+      self.write('{0:<18}{1:>15}\n\n'.format('BONUS:', '+'+str(self.bonus)))
       self.total_score += self.bonus
       if self.total_score > 100:
         total_score = 100
@@ -65,7 +65,3 @@ class Student(object):
     if any(val < 0 for val in self.points.values()):
       print('Warning, deducted more than possible points for categorie(s). Capping at 0...')
       self.points = dict([(cat, val) if val >= 0 else (cat, 0) for cat, val in self.points.iteritems()])
-
-  def __str__(self):
-    to_str = 'Student: {0}, Git: {1}, path: {2}'.format(self.sunet, self.git, self.path)
-    return to_str

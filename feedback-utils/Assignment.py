@@ -2,6 +2,7 @@ import copy
 import os, sys
 import matplotlib
 import utils
+import glob
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -23,7 +24,7 @@ class Assignment(object):
     self.git_root = root_git
 
     # contains only students' scores > 0 for plotting purposes
-    self.ta_scores_list = []    
+    self.ta_scores_list = []
     
     self.notExists = []
     self.notSubmitted = []
@@ -69,10 +70,10 @@ class Assignment(object):
       for hw_dir in ['hw{0}'.format(str(ii)) for ii in range(1,7)]+['project']:
         if not os.path.exists(os.path.join(self.git_root, directory, hw_dir)):
           os.makedirs(os.path.join(self.git_root, directory, hw_dir))
-
+  
 
   def checkStudents(self):
-    ignore_list = ['.DS_Store', 'README.md']
+    ignore_list = ['.DS_Store', '._.DS_Store', '.__afs7786', 'README.md','']
     for student in self.students:
       student_path = student.getPath()
       if not os.path.exists(student_path):
@@ -81,27 +82,46 @@ class Assignment(object):
         for cat, total_points in self.category_map.iteritems():
           student.subtract(cat, total_points)
       else:
-        to_walk = [_ for _ in os.walk(student_path)]
-        if len(to_walk) > 1:
-          continue
-        remaining_files = copy.deepcopy(to_walk[0][2])
+        glob_list = glob.glob(os.path.join(student_path, '*'))
+        while True:
+          try:
+            idx_hw = [os.path.split(a)[-1].lower() for a in glob_list].index(self.hw)
+          except ValueError:
+            break
+          else:
+            glob_list = glob.glob(os.path.join(glob_list[idx_hw],'*'))
+        files = [os.path.split(a)[-1] for a in glob_list]
+        ignore_list[-1] = student.getFilename()
         for ignore in ignore_list:
           try:
-            remaining_files.pop( remaining_files.index(ignore) )
+            files.pop( files.index(ignore) )
           except ValueError:
             pass
-        if len(remaining_files) == 0:
+        if len(files) == 0:
           print('{0} not submitted. Points set to 0'.format(student.getSunet()))
           self.notSubmitted.append(student.getSunet())
           for cat, total_points in self.category_map.iteritems():
             student.subtract(cat, total_points)
-        elif len(remaining_files) == 1:
-          print('WARNING! {0}-submit/{1}/ seems to have only 1 file \'{2}\' in directory. Check manually!'.format(student.getGit(), self.hw, remaining_files[0]))
+        elif len(files) == 1:
+          print('WARNING! {0} seems to have only 1 file \'{1}\' in directory. Check manually!'.format(student.getSunet(), files[0]))
           sys.exit(0)
     print('\n')
     self.checkExistsDirs()
     self.writeMissingStudents()
-    self.writeNotSubmittedStudents()        
+    self.writeNotSubmittedStudents()
+
+  def setScores(self):
+    for student in self.students:
+      student.setScore(self.category_map)
+
+  def capPoints(self):
+    for student in self.students:
+      student.capPoints()
+
+  def saveFiles(self):
+    for student in self.students:
+      if student.getSunet() not in self.notExists:
+        student.saveFile()
 
   def plotScoresDistr(self):
     total_scores = [int(student.getScore()) for student in self.students]
@@ -165,8 +185,21 @@ class Assignment(object):
     plt.legend( map(lambda x: x[0], bar_list), self.cat_list )
     plt.savefig( os.path.join(self.git_root, 'figs', self.hw, 'TaScoresDistr.png' ))
 
+    # write the mean and std to file
+    ss = StringStream()
+    for ta in students_mean_std:
+      write_cat = ['{0}-{1:.2f}'.format(self.cat_list[index],mean) for index, mean in enumerate(ta[2])]
+      ss.write('{0},{1},mean-{2:.2f},std-{3:.2f}\n'.format(ta[0], ','.join(write_cat), sum(ta[2]), ta[1]) )    
+    with open(os.path.join(self.git_root, 'data', self.hw, 'TaScoresMeanStd.txt'), 'w') as f:
+      f.write(str(ss))
+
   def printOutput(self):
     ss = StringStream()
+    ss.write('\n')
+    for student in self.students:
+      if ( (student.getSunet() not in self.notExists) and (student.getSunet() not in self.notSubmitted) ):
+        ss.write('{0:<20}{1}\t{2}/100\n'.format(student.getSunet(), 'points:', student.getScore()))
+    ss.write('\n')
     ss.write('{0:<17}{1}/{2}\n'.format('NOT-EXISTED:', len(self.notExists), len(self.students)))
     ss.write('{0:<17}{1}/{2}\n'.format('NOT-SUBMITTED:', len(self.notSubmitted), len(self.students)))
     print(str(ss))

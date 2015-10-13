@@ -3,17 +3,17 @@ import os
 from StringStream import StringStream
 
 class Student(object):
-  def __init__(self, sunet, git, repo_path, hw_dir, points_dict):
+  def __init__(self, sunet, git, repo_path, hw, points_dict):
     self.sunet = sunet
     self.git = git
     self.filename = 'feedback_{0}.txt'.format(sunet)
     self.filestring = StringStream()
-    self.path = os.path.join(repo_path, git+'-submit', hw_dir)
+    self.path = os.path.join(repo_path, sunet, hw)
     self.bonus = -1
     self.points = points_dict
     self.total_score = 0
 
-  def setScoreWrite(self, cat_map):
+ def setScore(self, cat_map):
     self.write('\n')
     for cat, val in self.points.iteritems():
       self.write('{0:<18}{1:>15}\n'.format(cat.upper()+':', str(val)+'/'+str(cat_map[cat])))
@@ -27,6 +27,9 @@ class Student(object):
         total_score = 100
 
     self.write('{0:<18}{1:>15}\n'.format('TOTAL POINTS:',self.total_score))
+
+  def getFilename(self):
+    return self.filename
 
   def getPath(self):
     return self.path

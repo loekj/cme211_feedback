@@ -91,7 +91,7 @@ def gradeStudent(assignment, student):
           continue
         else:
           while(is_python is None):
-            file_ext = raw_input('Unknown type {0}. \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename))
+            file_ext = raw_input('Unknown type {0} \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
@@ -106,12 +106,6 @@ def gradeStudent(assignment, student):
               is_python = False
         if is_python is not None:
           parseFile(root, filename, assignment, student, is_python)
-  
-  # Cap at 0 points maximum assigned
-  student.capPoints()
-  
-  # Set final score and write summary
-  student.setScoreWrite(assignment.getCatMap())
 
 
 
@@ -183,8 +177,16 @@ def main(argv=sys.argv):
         continue
       print('...repo: {0}'.format(student.getSunet()))
       gradeStudent(assignment, student)
-      student.saveFile() 
-      print('...done! {0} points: {1}/100\n'.format(student.getSunet(), student.getScore()))
+      print('...done!')
+
+    # set score map of students
+    assignment.setScores()
+
+    # cap points to nonnegative
+    assignment.capPoints()
+
+    # save all files to repos
+    assignment.saveFiles()
 
     # checks whether /data/* and /figs/* exists, otherwise creates it
     assignment.checkExistsDirs()

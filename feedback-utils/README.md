@@ -81,7 +81,6 @@ Whenever it stumbles upon an unknown extension it will prompt the user to choose
 * '' for skipping the file only once
 * 'e' for skipping all files (globally) with this extension
 * 'f' for skipping all files (globally) with the same file name
-<<<<<<< HEAD
 
 Then it proceeds to check each file for a 'not submitted' flag denoted by the regex:<br>
 ```
@@ -95,20 +94,6 @@ Then it checks for bonus regex, and the normal category deduction regex. It wrap
 * Unknown extension prompt answer 'f' can be unstable: It checks file name only, any subdirectories not taken into account! Hence if there's a subdirectory with the same file name it will skip that one too. Be careful!
 * A file name without an extension or ending with a dot '.' are appended with a .NO\_EXT flag. Be careful to skip all .NO\_EXT extensions by default. Recommended usage is to just skip them only once.
 * _min\_files_ parameter does not include sub directory search as of now. Minimum (main) files in hw2/ directory only are considered.
-=======
-
-Then it proceeds to check each file for a 'not submitted' flag denoted by the regex:
-```//--notsubmitted```
-If it finds one of these, it marks the student as not submitted and deducts all points. This is important as sometimes a students pushes something to git that's just total nonsense. We don't want to delete the files, so just put this regex at the top of one of the files.
->>>>>>> 5788d1bd7949c461228758fca2c6cf7b311daac0
-
-Then it checks for bonus regex, and the normal category deduction regex. It wraps up with some post processing to checks students' scores (cap at 0), add bonuses, etcetera.
-
-### NOTES:
-* Unknown extension prompt answer 'f' can be unstable: It checks file name only, any subdirectories not taken into account! Hence if there's a subdirectory with the same file name it will skip that one too. Be careful!
-* A file name without an extension or ending with a dot '.' are appended with a .NO\_EXT flag. Be careful to skip all .NO\_EXT extensions by default. Recommended usage is to just skip them only once.
-* _min\_files_ parameter does not include sub directory search as of now. Minimum (main) files in hw2/ directory only are considered.
-
 
 ## Output
 The feedback.py file will output a file in the students' corresponding hw directory; the file is called feedback_[SUnetID].txt

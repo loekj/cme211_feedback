@@ -8,11 +8,84 @@ from Student import Student
 from Assignment import Assignment
 
 
-PY_EXT = ('py')
-C_EXT = ('h', 'hpp', 'c', 'cpp')
+PY_EXT = ['py']
+C_EXT = ['h', 'hpp', 'c', 'cpp']
+
+# ignoring these extensions
+IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log'] 
+
+
 
 RE_PATTERN = '^\s*{0}--([a-zA-Z]+)_(\d{{1,2}})(.*?){0}--END'
 RE_BONUS_PATTERN = '^\s*{0}--(?:bonus|BONUS)_(\d{{1,2}})(.*?){0}--END'
+RE_NOTSUBM_PATTERN = '^\s*{0}--(notsubmitted|NOTSUBMITTED)'
+
+def printIgnoreExt():
+  global IGNORE_EXT
+  IGNORE_EXT = IGNORE_EXT + \
+                map(lambda x: x+'#', PY_EXT+C_EXT+IGNORE_EXT) + \
+                map(lambda x: x+'~', PY_EXT+C_EXT+IGNORE_EXT) + \
+                ['sw'+chr(a) for a in range(107,113)]
+  print('Ignoring extensions:')
+  print(', '.join(IGNORE_EXT + ['.(hidden)'] ))
+  print('\n')
+
+
+def regexNotSubmitted(assignment, student, re_notsubm_pattern, file_content, file_name, comment_style):
+  m = re.search(re_notsubm_pattern, file_content)
+  if m is not None:
+    print('Not submitted flag found for {0} ({1}-submit) in file {2}'.format(student.getSunet(), student.getGit(), file_name))
+    assignment.notSubmitted.append(student.getSunet())
+    student.subtractAll()
+    return False
+  return True
+
+def regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, comment_style):
+  m = re.search(re_bonus_pattern, file_content)
+  if m is not None:
+    points = int(m.group(1))
+    comments = m.group(2)
+    has_code = True
+    if not comment_style+'--START' in comments:
+      has_code = False
+    else:
+      comments, code_block = comments.split(comment_style+'--START')
+    comments = [line.strip()[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
+    comments = ['-'+line.strip() if not line.strip().startswith('-') else line.strip() for line in comments]
+    if has_code:
+      student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\nRELEVANT CODE:\n{5}\n\n\n\n--------------------------\n'.format('FILE:',file_name, 'BONUS', '+'+str(points),('\n').join(comments),code_block.strip()))
+    else:
+      student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\n\n\n--------------------------\n'.format('FILE:',file_name, 'BONUS', '+'+str(points), ('\n').join(comments)))
+    student.addBonus(points)
+
+def regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style):
+  m = re.findall(re_categories_pattern, file_content)
+  if m is not None and len(m) != 0:
+    for comment in m:
+      cat = comment[0].strip().lower()
+      points = int(comment[1].strip())
+
+      has_code = True
+      if not comment_style+'--START' in comment[2]:
+        comments = comment[2]
+        has_code = False
+      else:
+        comments, code_block = comment[2].split(comment_style+'--START')
+      comments = [line.strip()[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
+      comments = ['-'+line.strip() if not line.strip().startswith('-') else line.strip() for line in comments]
+      cat_list = assignment.getCatMap().keys()
+      if cat.lower() != 'bonus' and cat not in cat_list:
+        while(True):
+          cat_in = raw_input('Category \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
+          if cat_in.strip() in cat_list:
+            cat = cat_in.strip()
+            break
+      if cat.lower() != 'bonus':
+        if has_code:
+          student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\nRELEVANT CODE:\n{5}\n\n\n\n--------------------------\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
+        else:
+          student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\n\n\n--------------------------\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments)))
+        student.subtract(cat, points)
 
 
 def parseFile(root, file_name, assignment, student, is_python):  
@@ -25,73 +98,48 @@ def parseFile(root, file_name, assignment, student, is_python):
   else:
     comment_style = '//'
 
-  re_pattern = re.compile(RE_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )
-  re_bonus_pattern = re.compile(RE_BONUS_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )
-  
-  # find bonus, if any
-  m = re.search(re_bonus_pattern, file_content)
-  if m is not None:
-    points = int(m.group(1))
-    comments = m.group(2)
-    has_code = True
-    if not comment_style+'--START' in comments:
-      has_code = False
-    else:
-      comments, code_block = comments.split(comment_style+'--START')
-    comments = [line[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
-    comments = ['-'+line if not line.startswith('-') else line for line in comments]
-    if has_code:
-      student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}\n--------------------------\n\n'.format('FILE:',file_name, 'BONUS', '+'+str(points),('\n').join(comments),code_block.strip()))
-    else:
-      student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\n--------------------------\n\n'.format('FILE:',file_name, 'BONUS', '+'+str(points), ('\n').join(comments)))
-    student.addBonus(points)
+  # compile regex
+  re_notsubm_pattern = re.compile(RE_NOTSUBM_PATTERN.format(comment_style))
+  re_categories_pattern = re.compile(RE_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )
+  re_bonus_pattern = re.compile(RE_BONUS_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )    
 
-  m = re.findall(re_pattern, file_content)
-  if m is not None and len(m) != 0:
-    for comment in m:
-      cat = comment[0].strip().lower()
-      points = int(comment[1].strip())
+  # check for not submitted flag
+  if not regexNotSubmitted(assignment, student, re_notsubm_pattern, file_content, file_name, comment_style):
+    return
 
-      has_code = True
-      if not comment_style+'--START' in comment[2]:
-        comments = comment[2]
-        has_code = False
-      else:
-        comments, code_block = comment[2].split(comment_style+'--START')
-      comments = [line[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
-      comments = ['-'+line if not line.startswith('-') else line for line in comments]
-      cat_list = assignment.getCatMap().keys()
-      if cat.lower() != 'bonus' and cat not in cat_list:
-        while(True):
-          cat_in = raw_input('Category \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
-          if cat_in.strip() in cat_list:
-            cat = cat_in.strip()
-            break
-      if cat.lower() != 'bonus':
-        if has_code:
-          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\nCODE:\n...\n{5}\n--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
-        else:
-          student.write('{0:<15}{1}\n{2:<15}{3}\n{4}\n--------------------------\n\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments)))
-        student.subtract(cat, points)
+  # check for bonus and add bonus
+  regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, comment_style)
 
+  # check for normal subtract categories
+  regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
 
 
 def gradeStudent(assignment, student):
   for root, dirnames, filenames in os.walk(student.getPath()):
       for filename in filenames:
         is_python = None
+        
+        # If ends with . or no . at all, add no extension flag to file
         if not '.' in filename:
-          filename = filename+'.'
+          filename = filename+'.NO_EXT'
+        elif filename.endswith('.'):
+          filename = filename+'NO_EXT'
+
         file_extension = filename.lower().split('.')[-1]
+        if filename.startswith('.') or file_extension in IGNORE_EXT:
+          continue
+
         if file_extension in C_EXT:
           is_python = False
         elif file_extension in PY_EXT:
           is_python = True
         elif file_extension in assignment.getSkipExts() or filename in assignment.getSkipFiles():
           continue
+
+        # unknown extension. Prompt user what to do
         else:
           while(is_python is None):
-            file_ext = raw_input('Unknown type {0} \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename))
+            file_ext = raw_input('Unknown: {0} ext: .{1} \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename, file_extension))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
@@ -108,37 +156,57 @@ def gradeStudent(assignment, student):
           parseFile(root, filename, assignment, student, is_python)
 
 
+def postProcess(assignment):
+    # set score map of students
+    assignment.setScores()
 
-def main(argv=sys.argv):
-  if len(sys.argv) < 2:
-    print ('Usage:\n\t {0} <config file> [optional : <SUnetID>]'.format(sys.argv[0]))
-    return 1
+    # cap points to nonnegative
+    assignment.capPoints()  
 
-  if len(sys.argv) > 2:
-    sunet_id = sys.argv[2].strip()
+def writeToFiles(assignment):
+    # checks whether /data/* and /figs/* exists, otherwise creates it
+    assignment.checkExistsDirs()
+    # save all feedback to repos
+    assignment.saveFiles()
+    # write files from students who not submitted and not exists
+    assignment.writeMissingStudents()
+    assignment.writeNotSubmittedStudents()  
+    # write score distributions
+    assignment.writeScoresToFile()
+    assignment.writeTADistr()
 
-  # open config file
-  configfile = sys.argv[1]
+def writePlots(assignment):
+    assignment.plotScoresDistr()
+    assignment.plotTADistr()
+
+
+def initialize(assignment):
+  printIgnoreExt()
+
+  # create student objects and store them in assignement object
+  assignment.createStudents()
+
+  # check whether students repo path exists, and whether they have submitted (also need manual precheck)
+  assignment.checkStudents()
+
+
+def getParams(config_path):
   try:
-    f = open(configfile)
+    f = open(config_path)
   except:
-    print('YAML file {0} could not be opened'.format(configfile))
+    print('YAML file {0} could not be opened'.format(config_path))
     return 1
   else:
     params = yaml.load(f)
     f.close()
+    return params
 
-  # get config yaml params
-  is_global = params['global']
-  repo_path = params['repo_path']
-  hw = params['hw']
-  map_ta = params['map_ta']
-  root_git = params['root_git']
-
+def getCatMap(categories):
   # parse categories to dict such that categories: max points are key value pairs
-  cat_map = dict([ (cat.split('-')[0], int(cat.split('-')[1])) for cat in params['categories'].split(' ')])
+  return dict([ (cat.split('-')[0], int(cat.split('-')[1])) for cat in categories.split(' ')])
 
-  # check if input args valid
+
+def getMaps(map_ta):
   try:
     with open(map_ta) as f:
       map_ta_list = f.readlines()
@@ -148,60 +216,43 @@ def main(argv=sys.argv):
   ta_dict = dict( [ (ta.strip().split()[-1], []) for ta in map_ta_list] )
   [ ta_dict[line.strip().split()[-1]].append(line.strip().split()[0]) for line in map_ta_list ]
   sunet_to_git = dict( [ (line.strip().split()[0], line.strip().split()[1]) for line in map_ta_list ] )
+  return ta_dict, sunet_to_git
 
-  if is_global:
-    if len(sys.argv) > 2:
-      print('Global flag set, but single SUNETid passed')
-      return 1    
-  elif len(sys.argv) < 3:
-    print('Global flag false, but no student repo name arg passed.')
+
+def main(argv=sys.argv):
+  if len(sys.argv) < 2:
+    print ('Usage:\n\t {0} <config file>'.format(sys.argv[0]))
     return 1
 
+  # get params from config file
+  params = getParams(sys.argv[1])
+
+  # get config yaml params
+  repo_path = params['repo_path']
+  hw = params['hw']
+  ta_dict, sunet_to_git = getMaps(params['map_ta'])
+  root_git = params['root_git']
+  min_files = int(params['min_files'])
+  cat_map = getCatMap(params['categories'])
+
   # set-up assignment class with students
-  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw, repo_path, root_git)
+  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw, repo_path, root_git, min_files)
+  initialize(assignment)
 
-  # create student objects and store them in assignement object
-  assignment.createStudents()
-
-  # check whether students repo path exists, and whether they have submitted (also need manual precheck)
-  assignment.checkStudents()
-
-  if not is_global:
-    student = assignment.getStudent(sunet_id)
+  # loop over students and grade!
+  for student in assignment.getStudents():
+    if (student.getSunet() in assignment.getNotExists()) or (student.getSunet() in assignment.getNotSubmitted()):
+      continue
+    print('{0:<20}{1} ({2}-submit)'.format('...student:', student.getSunet(), student.getGit()))
     gradeStudent(assignment, student)
-    student.saveFile()
-    print('...done! {0} points: {1}/100\n'.format(sunet_id, student.getScore()))
-  else:
-    for student in assignment.getStudents():
-      if (student.getSunet() in assignment.getNotExists()) or (student.getSunet() in assignment.getNotSubmitted()):
-        continue
-      print('...repo: {0}'.format(student.getSunet()))
-      gradeStudent(assignment, student)
-      print('...done!')
+    print('...done!')
 
-    # set score map of students
-    assignment.setScores()
-
-    # cap points to nonnegative
-    assignment.capPoints()
-
-    # save all files to repos
-    assignment.saveFiles()
-
-    # checks whether /data/* and /figs/* exists, otherwise creates it
-    assignment.checkExistsDirs()
-
-    # make plots
-    assignment.plotScoresDistr()
-    assignment.plotTADistr()
-    
-    # write to files
-    assignment.writeScoresToFile()
-    assignment.writeTADistr()
-
-    # print summary to stdout
-    assignment.printOutput()
-  print('...finished!')
+  postProcess(assignment)
+  writeToFiles(assignment)
+  writePlots(assignment)
+  
+  # print summary to stdout
+  assignment.printOutput()
 
 
 if __name__=='__main__':

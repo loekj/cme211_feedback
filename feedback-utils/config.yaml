@@ -1,4 +1,4 @@
-# Path to directory where repositories will be cloned to
+# Path to directory where repositories live
 repo_path: /afs/ir/class/cme211/git/repos/
 
 # Categories to grade, separated by a space
@@ -7,11 +7,11 @@ categories: "functionality-65 design-15 style-10 writeup-10"
 # Hw to be graded
 hw: hw2
 
-# If true, all the feedback of the repos will be generated, else only local.
-global: true
-
 # Name of sunets-git-TA map file
 map_ta: /afs/ir/class/cme211/git/repos/TA_assignments.txt
 
 # Git root for creation of figs and data files
 root_git: /afs/ir/class/cme211/git/
+
+# Absolute minimum number of files to submit (the main programming files)
+min_files: 2

@@ -11,7 +11,7 @@ from StringStream import StringStream
 
 
 class Assignment(object):
-  def __init__(self, category_map, ta_dict, student_git_map, hw, repository_path, root_git):
+  def __init__(self, category_map, ta_dict, student_git_map, hw, repository_path, root_git, min_files):
     self.category_map = category_map
     self.cat_list = category_map.keys()
     self.student_git_map = student_git_map
@@ -22,6 +22,7 @@ class Assignment(object):
     self.skip_files = []
     self.skip_ext = []
     self.git_root = root_git
+    self.min_files = min_files
 
     # contains only students' scores > 0 for plotting purposes
     self.ta_scores_list = []
@@ -32,8 +33,11 @@ class Assignment(object):
   def getCatMap(self):
     return self.category_map
 
+  def getMinFiles(self):
+    return self.min_files
+
   def createStudents(self):
-    self.students = [Student(sunet, git, self.repo_path, self.hw_dir, copy.deepcopy(self.category_map)) \
+    self.students = [Student(sunet, git, self.repo_path, self.hw, copy.deepcopy(self.category_map)) \
                         for sunet, git in self.student_git_map.iteritems()]
 
   def getNotExists(self):
@@ -78,9 +82,8 @@ class Assignment(object):
       student_path = student.getPath()
       if not os.path.exists(student_path):
         self.notExists.append(student.getSunet())
-        print('{0} missing. Points set to 0'.format(student.getSunet()))
-        for cat, total_points in self.category_map.iteritems():
-          student.subtract(cat, total_points)
+        print('{0:<20}{1:<20}{2:<20}'.format('Missing:',student.getSunet(), student.getGit()))
+        student.subtractAll()
       else:
         glob_list = glob.glob(os.path.join(student_path, '*'))
         while True:
@@ -98,21 +101,29 @@ class Assignment(object):
           except ValueError:
             pass
         if len(files) == 0:
-          print('{0} not submitted. Points set to 0'.format(student.getSunet()))
+          print('{0:<20}{1:<20}{2:<20}'.format('Not submitted:',student.getSunet(), student.getGit()))
           self.notSubmitted.append(student.getSunet())
-          for cat, total_points in self.category_map.iteritems():
-            student.subtract(cat, total_points)
-        elif len(files) == 1:
-          print('WARNING! {0} seems to have only 1 file \'{1}\' in directory. Check manually!'.format(student.getSunet(), files[0]))
-          sys.exit(0)
+          student.subtractAll()
+        elif len(files) < self.min_files:
+          while True:
+            input = raw_input('WARNING! {0}, ({1}-submit) only has files \'{2}\'.\nIs this correct? Enter \'n\' to declare as not submitted. Otherwise \'y\': '.format(student.getSunet(), student.getGit(), ', '.join(files)))
+            if input.strip() == 'n':
+              self.notSubmitted.append(student.getSunet())
+              student.subtractAll()
+              break
+            elif input.strip() == 'y':
+              break
     print('\n')
-    self.checkExistsDirs()
-    self.writeMissingStudents()
-    self.writeNotSubmittedStudents()
 
   def setScores(self):
     for student in self.students:
-      student.setScore(self.category_map)
+      sunet = student.getSunet()
+      ta_list = [ta for ta, sunet_list in self.ta_dict.iteritems() if sunet in sunet_list]
+      if len(ta_list) != 1:
+        ta = 'Unknown, email staff!'
+      else: 
+        ta = ta_list[0]
+      student.setScore(self.category_map, ta)
 
   def capPoints(self):
     for student in self.students:
@@ -195,13 +206,13 @@ class Assignment(object):
 
   def printOutput(self):
     ss = StringStream()
-    ss.write('\n')
+    ss.write('\n{0}\nSUMMARY\n{1}\n'.format(''.join(['#']*63), ''.join(['#']*63)))
     for student in self.students:
       if ( (student.getSunet() not in self.notExists) and (student.getSunet() not in self.notSubmitted) ):
-        ss.write('{0:<20}{1}\t{2}/100\n'.format(student.getSunet(), 'points:', student.getScore()))
-    ss.write('\n')
-    ss.write('{0:<17}{1}/{2}\n'.format('NOT-EXISTED:', len(self.notExists), len(self.students)))
-    ss.write('{0:<17}{1}/{2}\n'.format('NOT-SUBMITTED:', len(self.notSubmitted), len(self.students)))
+        ss.write('{0:<20}{1:<25}{2:<10}{3:>8}\n'.format(student.getSunet(), student.getGit(),'points:', str(student.getScore()) + '/100'))
+    ss.write('{0}\n'.format(''.join(['#']*63)))
+    ss.write('{0:<20}{1}/{2}\n'.format('NOT-EXISTED:', len(self.notExists), len(self.students)))
+    ss.write('{0:<20}{1}/{2}\n'.format('NOT-SUBMITTED:', len(self.notSubmitted), len(self.students)))
     print(str(ss))
 
     

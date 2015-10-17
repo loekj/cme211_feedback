@@ -180,7 +180,6 @@ class Assignment(object):
 
   def plotTADistr(self):
     self.getScoresPerTa()
-
     students_mean_std = map(lambda x: ( x[0], utils.sampleStd( [sum(student) for student in x[1]] ),[utils.mean(cat) for cat in zip(*x[1])] ) , self.ta_scores_list)
     students_mean_std = [tas for tas in students_mean_std if len(tas[2]) != 0]
     idx = range(len([tas for tas in self.ta_scores_list if len(tas[1]) != 0]))

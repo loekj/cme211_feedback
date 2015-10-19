@@ -119,7 +119,8 @@ def parseFile(root, file_name, assignment, student, is_python):
 
   # check for normal subtract categories
   has_deductions = regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
-
+  if student.getSunet() == 'zdr':
+    print('has bonus: ',str(has_bonus), ' has deduct: ', str(has_deductions))
   if (not has_bonus) and (not has_deductions):
     return False
   return True
@@ -151,11 +152,12 @@ def gradeStudent(assignment, student):
         # unknown extension. Prompt user what to do
         else:
           while(is_python is None):
-            file_ext = raw_input('\t{0:<25}{1:<25}\n\t{2:<25}{3:<25}\n\t{4:<25}'.format('File:','...'+filename[max(len(filename)-10,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
+            file_ext = raw_input('\t{0:<29}{1:<29}\n\t{2:<29}{3:<29}\n\t{4:<29}'.format('File:','...'+filename[max(len(filename)-18,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
-              assignment.skipExt(filename.split('.')[-1])
+              if file_extension != 'no_ext':
+                assignment.skipExt(file_extension)
               break
             elif file_ext.strip() == 'f':
               assignment.skipFile(filename)
@@ -165,7 +167,8 @@ def gradeStudent(assignment, student):
             elif file_ext.strip().lower() == 'c':
               is_python = False
         if is_python is not None:
-          wrote_to_student = parseFile(root, filename, assignment, student, is_python)
+          if parseFile(root, filename, assignment, student, is_python):
+            wrote_to_student = True
 
   if not wrote_to_student:
     while True:

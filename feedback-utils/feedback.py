@@ -76,7 +76,7 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
       cat_list = assignment.getCatMap().keys()
       if cat.lower() != 'bonus' and cat not in cat_list:
         while(True):
-          cat_in = raw_input('\tCategory \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
+          cat_in = raw_input('\tCategory \'{0}\' unknown, type one of the categories: \n\t{1}:\n\t'.format(cat, " ".join(cat_list)))
           if cat_in.strip() in cat_list:
             cat = cat_in.strip()
             break
@@ -119,7 +119,8 @@ def parseFile(root, file_name, assignment, student, is_python):
 
   # check for normal subtract categories
   has_deductions = regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
-
+  if student.getSunet() == 'zdr':
+    print('has bonus: ',str(has_bonus), ' has deduct: ', str(has_deductions))
   if (not has_bonus) and (not has_deductions):
     return False
   return True
@@ -132,13 +133,15 @@ def gradeStudent(assignment, student):
         is_python = None
         
         # If ends with . or no . at all, add no extension flag to file
-        if not '.' in filename:
-          filename = filename+'.NO_EXT'
-        elif filename.endswith('.'):
-          filename = filename+'NO_EXT'
+        filename_check_copy = filename
 
-        file_extension = filename.lower().split('.')[-1]
-        if filename.startswith('.') or file_extension in IGNORE_EXT:
+        if not '.' in filename_check_copy:
+          filename_check_copy = filename_check_copy+'.NO_EXT'
+        elif filename_check_copy.endswith('.'):
+          filename_check_copy = filename_check_copy+'NO_EXT'
+
+        file_extension = filename_check_copy.lower().split('.')[-1]
+        if filename_check_copy.startswith('.') or file_extension in IGNORE_EXT:
           continue
 
         if file_extension in C_EXT:
@@ -151,11 +154,12 @@ def gradeStudent(assignment, student):
         # unknown extension. Prompt user what to do
         else:
           while(is_python is None):
-            file_ext = raw_input('\t{0:<25}{1:<25}\n\t{2:<25}{3:<25}\n\t{4:<25}'.format('File:','...'+filename[max(len(filename)-10,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
+            file_ext = raw_input('\t{0:<30}{1:<30}\n\t{2:<30}{3:<30}\n\t{4:<29}'.format('File:','...'+filename_check_copy[max(len(filename_check_copy)-20,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
-              assignment.skipExt(filename.split('.')[-1])
+              if file_extension != 'no_ext':
+                assignment.skipExt(file_extension)
               break
             elif file_ext.strip() == 'f':
               assignment.skipFile(filename)
@@ -165,7 +169,8 @@ def gradeStudent(assignment, student):
             elif file_ext.strip().lower() == 'c':
               is_python = False
         if is_python is not None:
-          wrote_to_student = parseFile(root, filename, assignment, student, is_python)
+          if parseFile(root, filename, assignment, student, is_python):
+            wrote_to_student = True
 
   if not wrote_to_student:
     while True:

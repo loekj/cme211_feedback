@@ -23,7 +23,7 @@ class Student(object):
       self.write('{0:<18}{1:>15}\n\n'.format('BONUS:', '+'+str(self.bonus)))
       self.total_score += self.bonus
       if self.total_score > 100:
-        total_score = 100
+        self.total_score = 100
 
     self.write('\n{0:<18}{1:>15}\n{2}\n'.format('GRADING TA:', ta, ''.join(['#']*33)))        
     self.write('{0:<18}{1:>15}\n{2}\n'.format('TOTAL POINTS:',self.total_score, ''.join(['#']*33) ))

@@ -12,7 +12,7 @@ PY_EXT = ['py']
 C_EXT = ['h', 'hpp', 'c', 'cpp']
 
 # ignoring these extensions
-IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log'] 
+IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data'] 
 
 
 
@@ -190,11 +190,12 @@ def gradeStudent(assignment, student):
 
 
 def postProcess(assignment):
+    # cap points to nonnegative
+    assignment.capPoints()  
+
     # set score map of students
     assignment.setScores()
 
-    # cap points to nonnegative
-    assignment.capPoints()  
 
 def writeToFiles(assignment):
     # checks whether /data/* and /figs/* exists, otherwise creates it

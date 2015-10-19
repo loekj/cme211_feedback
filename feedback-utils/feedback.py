@@ -47,7 +47,7 @@ def regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, c
       try:
         comments, code_block = comments.split(comment_style+'--START')
       except ValueError as e:
-        print('ERROR: Wrong syntax block, splitting on --START is wrong:')
+        print('ERROR: Wrong syntax block, splitting on --START is wrong in file {0}'.format(file_name))
         print(comments)
         sys.exit(1)
     comments = [line.strip()[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
@@ -73,7 +73,12 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
         comments = comment[2]
         has_code = False
       else:
-        comments, code_block = comment[2].split(comment_style+'--START')
+        try:
+          comments, code_block = comment[2].split(comment_style+'--START')
+        except ValueError as e:
+          print('ERROR: Wrong syntax block, splitting on --START is wrong in file {0}'.format(file_name))
+          print(comments)
+          sys.exit(1)          
       comments = [line.strip()[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
       comments = ['-'+line.strip() if not line.strip().startswith('-') else line.strip() for line in comments]
       cat_list = assignment.getCatMap().keys()

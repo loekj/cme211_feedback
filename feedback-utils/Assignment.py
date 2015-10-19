@@ -179,7 +179,10 @@ class Assignment(object):
       for ta, student in ta_scores_dict.iteritems():
         for sunet_id, student_points in student:
           points_string = ','.join( ['{0}-{1}/{2}'.format(cat, str(points), str(self.category_map[cat])) for cat, points in student_points.iteritems()] )
-          f.write('{0},{1},{2}\n'.format(ta, sunet_id, points_string))
+          if student.getBonus() != -1:
+            f.write('{0},{1},{2},bonus-{3}\n'.format(ta, sunet_id, points_string, str(student.getBonus())))
+          else:
+            f.write('{0},{1},{2}\n'.format(ta, sunet_id, points_string))
 
   def plotTADistr(self):
     self.getScoresPerTa()

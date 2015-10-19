@@ -59,6 +59,8 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
   cat_regex_found = False
   m = re.findall(re_categories_pattern, file_content)
   if m is not None and len(m) != 0:
+    if student.getSunet() == 'zdr':
+      print('M is not none!: '+str(m))
     for comment in m:
       cat = comment[0].strip().lower()
       points = int(comment[1].strip())
@@ -78,6 +80,7 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
           if cat_in.strip() in cat_list:
             cat = cat_in.strip()
             break
+      print('cat = ', cat)
       if cat.lower() != 'bonus':
         if has_code:
           student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\nRELEVANT CODE:\n{5}\n\n\n\n--------------------------\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))

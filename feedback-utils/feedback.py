@@ -44,7 +44,12 @@ def regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, c
     if not comment_style+'--START' in comments:
       has_code = False
     else:
-      comments, code_block = comments.split(comment_style+'--START')
+      try:
+        comments, code_block = comments.split(comment_style+'--START')
+      except ValueError as e:
+        print('ERROR: Wrong syntax block, splitting on --START is wrong:')
+        print(comments)
+        sys.exit(1)
     comments = [line.strip()[3:].strip() for line in comments.split('\n') if line.strip() != '' and line.strip().startswith(comment_style+'--')]
     comments = ['-'+line.strip() if not line.strip().startswith('-') else line.strip() for line in comments]
     if has_code:
@@ -59,8 +64,6 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
   cat_regex_found = False
   m = re.findall(re_categories_pattern, file_content)
   if m is not None and len(m) != 0:
-    if student.getSunet() == 'zdr':
-      print('M is not none!: '+str(m))
     for comment in m:
       cat = comment[0].strip().lower()
       points = int(comment[1].strip())
@@ -80,7 +83,6 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
           if cat_in.strip() in cat_list:
             cat = cat_in.strip()
             break
-      print('cat = ', cat)
       if cat.lower() != 'bonus':
         if has_code:
           student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\nRELEVANT CODE:\n{5}\n\n\n\n--------------------------\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments),code_block.strip()))
@@ -119,8 +121,7 @@ def parseFile(root, file_name, assignment, student, is_python):
 
   # check for normal subtract categories
   has_deductions = regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
-  if student.getSunet() == 'zdr':
-    print('has bonus: ',str(has_bonus), ' has deduct: ', str(has_deductions))
+
   if (not has_bonus) and (not has_deductions):
     return False
   return True

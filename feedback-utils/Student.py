@@ -35,7 +35,7 @@ class Student(object):
     return self.path
 
   def addBonus(self, points):
-    if self.bonus == '-1':
+    if self.bonus == -1:
       self.bonus = 0
     self.bonus += points
 

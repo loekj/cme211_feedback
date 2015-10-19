@@ -57,6 +57,9 @@ class Assignment(object):
     else:
       return single_student
 
+  def addNotSubmitted(self, sunet):
+    self.notSubmitted.append(sunet)
+
   def skipFile(self, filename):
     self.skip_files.append(filename)
 

@@ -26,17 +26,12 @@ def printIgnoreExt():
                 map(lambda x: x+'#', PY_EXT+C_EXT+IGNORE_EXT) + \
                 map(lambda x: x+'~', PY_EXT+C_EXT+IGNORE_EXT) + \
                 ['sw'+chr(a) for a in range(107,113)]
-  print('Ignoring extensions:')
+  print('\nIgnoring extensions:')
   print(', '.join(IGNORE_EXT + ['.(hidden)'] ))
-  print('\n')
 
 
-def regexNotSubmitted(assignment, student, re_notsubm_pattern, file_content, file_name, comment_style):
-  m = re.search(re_notsubm_pattern, file_content)
-  if m is not None:
-    print('Not submitted flag found for {0} ({1}-submit) in file {2}'.format(student.getSunet(), student.getGit(), file_name))
-    assignment.notSubmitted.append(student.getSunet())
-    student.subtractAll()
+def regexNotSubmitted(re_notsubm_pattern, file_content):
+  if re.search(re_notsubm_pattern, file_content) is not None:
     return False
   return True
 
@@ -57,8 +52,11 @@ def regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, c
     else:
       student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\n\n\n--------------------------\n'.format('FILE:',file_name, 'BONUS', '+'+str(points), ('\n').join(comments)))
     student.addBonus(points)
+    return True
+  return False
 
 def regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style):
+  cat_regex_found = False
   m = re.findall(re_categories_pattern, file_content)
   if m is not None and len(m) != 0:
     for comment in m:
@@ -76,7 +74,7 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
       cat_list = assignment.getCatMap().keys()
       if cat.lower() != 'bonus' and cat not in cat_list:
         while(True):
-          cat_in = raw_input('Category \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
+          cat_in = raw_input('\tCategory \'{0}\' unknown, type one of the categories: {1}: '.format(cat, " ".join(cat_list)))
           if cat_in.strip() in cat_list:
             cat = cat_in.strip()
             break
@@ -86,6 +84,9 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
         else:
           student.write('{0:<15}{1}\n{2:<15}{3}\n\nCOMMENTS:\n{4}\n\n\n\n--------------------------\n'.format('FILE:',file_name, cat.upper(),'-'+str(points), ('\n').join(comments)))
         student.subtract(cat, points)
+        cat_regex_found = True
+  return cat_regex_found
+
 
 
 def parseFile(root, file_name, assignment, student, is_python):  
@@ -104,17 +105,25 @@ def parseFile(root, file_name, assignment, student, is_python):
   re_bonus_pattern = re.compile(RE_BONUS_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )    
 
   # check for not submitted flag
-  if not regexNotSubmitted(assignment, student, re_notsubm_pattern, file_content, file_name, comment_style):
-    return
+  if not regexNotSubmitted(re_notsubm_pattern, file_content):
+    print('\tNot submitted flag found for {0} ({1}-submit) in file {2}'.format(student.getSunet(), student.getGit(), file_name))
+    assignment.addNotSubmitted(student.getSunet())
+    student.subtractAll()
+    return True
 
   # check for bonus and add bonus
-  regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, comment_style)
+  has_bonus = regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, comment_style)
 
   # check for normal subtract categories
-  regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
+  has_deductions = regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
+
+  if (not has_bonus) and (not has_deductions):
+    return False
+  return True
 
 
 def gradeStudent(assignment, student):
+  wrote_to_student = False
   for root, dirnames, filenames in os.walk(student.getPath()):
       for filename in filenames:
         is_python = None
@@ -139,7 +148,7 @@ def gradeStudent(assignment, student):
         # unknown extension. Prompt user what to do
         else:
           while(is_python is None):
-            file_ext = raw_input('Unknown: {0} ext: .{1} \'py\'/\'c\'/\'e\'/\'f\'/\'\': '.format(filename, file_extension))
+            file_ext = raw_input('\t{0:<25}{1:<25}\n\t{2:<25}{3:<25}\n\t{4:<25}'.format('File:','...'+filename[max(len(filename)-10,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
             if file_ext.strip() == '':
               break
             elif file_ext.strip() == 'e':
@@ -153,7 +162,17 @@ def gradeStudent(assignment, student):
             elif file_ext.strip().lower() == 'c':
               is_python = False
         if is_python is not None:
-          parseFile(root, filename, assignment, student, is_python)
+          wrote_to_student = parseFile(root, filename, assignment, student, is_python)
+
+  if not wrote_to_student:
+    while True:
+      inp = raw_input('\tWARNING: No files parsed or no comments found... set as not submitted? y/n: ')
+      if inp == 'y':
+        assignment.addNotSubmitted(student.getSunet())
+        student.subtractAll()
+        break
+      elif inp == 'n':
+        break
 
 
 def postProcess(assignment):

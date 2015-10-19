@@ -1,5 +1,5 @@
 # Path to directory where repositories live
-repo_path: /afs/ir/class/cme211/git/repos/
+repo_path: /afs/ir/class/cme211/git/repos_hw2/
 
 # Categories to grade, separated by a space
 categories: "functionality-65 design-15 style-10 writeup-10"
@@ -8,7 +8,7 @@ categories: "functionality-65 design-15 style-10 writeup-10"
 hw: hw2
 
 # Name of sunets-git-TA map file
-map_ta: /afs/ir/class/cme211/git/repos/TA_assignments.txt
+map_ta: /afs/ir/class/cme211/git/repos_hw2/TA_assignments.txt
 
 # Git root for creation of figs and data files
 root_git: /afs/ir/class/cme211/git/

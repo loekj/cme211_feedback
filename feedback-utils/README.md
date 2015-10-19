@@ -92,7 +92,7 @@ Then it checks for bonus regex, and the normal category deduction regex. It wrap
 
 ### NOTES:
 * Unknown extension prompt answer 'f' can be unstable: It checks file name only, any subdirectories not taken into account! Hence if there's a subdirectory with the same file name it will skip that one too. Be careful!
-* A file name without an extension or ending with a dot '.' are appended with a .NO\_EXT flag. Be careful to skip all .NO\_EXT extensions by default. Recommended usage is to just skip them only once.
+* A file name without an extension or ending with a dot '.' are appended with a .NO\_EXT flag. These cannot be skipped on the 'extension' globally for safety, only on full filename
 * _min\_files_ parameter does not include sub directory search as of now. Minimum (main) files in hw2/ directory only are considered.
 
 ## Output

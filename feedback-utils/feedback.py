@@ -12,7 +12,7 @@ PY_EXT = ['py']
 C_EXT = ['h', 'hpp', 'c', 'cpp']
 
 # ignoring these extensions
-IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data'] 
+IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data','tar','zip','tex'] 
 
 
 

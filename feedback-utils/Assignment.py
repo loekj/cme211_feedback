@@ -107,7 +107,7 @@ class Assignment(object):
           print('{0:<20}{1:<20}{2:<20}'.format('Not submitted:',student.getSunet(), student.getGit()))
           self.notSubmitted.append(student.getSunet())
           student.subtractAll()
-        elif len(files) < self.min_files:
+        elif len(files) <= self.min_files:
           while True:
             input = raw_input('WARNING! {0}, ({1}-submit) only has files \'{2}\'.\nIs this correct? Enter \'n\' to declare as not submitted. Otherwise \'y\': '.format(student.getSunet(), student.getGit(), ', '.join(files)))
             if input.strip() == 'n':

@@ -67,5 +67,5 @@ class Student(object):
 
   def capPoints(self):
     if any(val < 0 for val in self.points.values()):
-      print('Warning, deducted more than possible points for categorie(s). Capping at 0...')
+      print('WARNING: For {0} ({1}-submit), deducted too many points for categorie(s). Capping at 0...'.format(self.sunet, self.git))
       self.points = dict([(cat, val) if val >= 0 else (cat, 0) for cat, val in self.points.iteritems()])

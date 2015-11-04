@@ -12,11 +12,11 @@ PY_EXT = ['py']
 C_EXT = ['h', 'hpp', 'c', 'cpp']
 
 # ignoring these extensions
-IGNORE_EXT = ['pdf','txt','pyc','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data','tar','zip','tex'] 
+IGNORE_EXT = ['pdf','txt','pyc','ipynb','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data','tar','zip','tex'] 
 
 
-
-RE_PATTERN = '^\s*{0}--([a-zA-Z]+)_(\d{{1,2}})(.*?){0}--END'
+RE_CAT = '{0}--([a-zA-Z]+)_(\d{{1,2}})'
+RE_PATTERN = '^\s*' + RE_CAT + '(.*?){0}--END'
 RE_BONUS_PATTERN = '^\s*{0}--(?:bonus|BONUS)_(\d{{1,2}})(.*?){0}--END'
 RE_NOTSUBM_PATTERN = '^\s*{0}--(notsubmitted|NOTSUBMITTED)'
 
@@ -60,9 +60,9 @@ def regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, c
     return True
   return False
 
-def regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style):
+def regexCategories(assignment, student, re_category_block_pattern, re_category_pattern, file_content, file_name, comment_style):
   cat_regex_found = False
-  m = re.findall(re_categories_pattern, file_content)
+  m = re.findall(re_category_block_pattern, file_content)
   if m is not None and len(m) != 0:
     for comment in m:
       cat = comment[0].strip().lower()
@@ -73,6 +73,14 @@ def regexCategories(assignment, student, re_categories_pattern, file_content, fi
         comments = comment[2]
         has_code = False
       else:
+        m = re.search(re_category_pattern, comment[2])
+        if m:
+          while True:
+            inp = raw_input('\tWARNING: Suspicious pattern found in comment block in file {0} Check file! Continue? y/n: '.format(file_name))
+            if inp == 'y':
+              break
+            elif inp == 'n':
+              sys.exit(1)
         try:
           comments, code_block = comment[2].split(comment_style+'--START')
         except ValueError as e:
@@ -111,7 +119,8 @@ def parseFile(root, file_name, assignment, student, is_python):
 
   # compile regex
   re_notsubm_pattern = re.compile(RE_NOTSUBM_PATTERN.format(comment_style))
-  re_categories_pattern = re.compile(RE_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )
+  re_category_pattern = re.compile(RE_CAT.format(comment_style))
+  re_category_block_pattern = re.compile(RE_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )
   re_bonus_pattern = re.compile(RE_BONUS_PATTERN.format(comment_style), flags = re.MULTILINE | re.DOTALL )    
 
   # check for not submitted flag
@@ -125,7 +134,7 @@ def parseFile(root, file_name, assignment, student, is_python):
   has_bonus = regexBonus(assignment, student, re_bonus_pattern, file_content, file_name, comment_style)
 
   # check for normal subtract categories
-  has_deductions = regexCategories(assignment, student, re_categories_pattern, file_content, file_name, comment_style)
+  has_deductions = regexCategories(assignment, student, re_category_block_pattern, re_category_pattern, file_content, file_name, comment_style)
 
   if (not has_bonus) and (not has_deductions):
     return False

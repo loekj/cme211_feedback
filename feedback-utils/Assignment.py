@@ -215,7 +215,7 @@ class Assignment(object):
     ss.write('\n{0}\nSUMMARY\n{1}\n'.format(''.join(['#']*63), ''.join(['#']*63)))
     for student in self.students:
       if ( (student.getSunet() not in self.notExists) and (student.getSunet() not in self.notSubmitted) ):
-        ss.write('{0:<20}{1:<25}{2:<10}{3:>8}\n'.format(student.getSunet(), student.getGit(),'points:', str(student.getScore()) + '/100'))
+        ss.write('{0:<20}{1:<25}{2:<10}{3:>8}\n'.format(student.getSunet(), student.getGit(),'points:', str(student.getScore()) + '/' + str(sum(self.category_map.values()))))
     ss.write('{0}\n'.format(''.join(['#']*63)))
     ss.write('{0:<20}{1}/{2}\n'.format('NOT-EXISTED:', len(self.notExists), len(self.students)))
     ss.write('{0:<20}{1}/{2}\n'.format('NOT-SUBMITTED:', len(self.notSubmitted), len(self.students)))

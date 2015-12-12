@@ -11,23 +11,10 @@ from Assignment import Assignment
 PY_EXT = ['py']
 C_EXT = ['h', 'hpp', 'c', 'cpp']
 
-# ignoring these extensions
-IGNORE_EXT = ['pdf','txt','pyc','ipynb','md', 'docx', 'doc', 'log','pages','xls','xlsx','numbers','keynote','info','data','tar','zip','tex'] 
-
-
 RE_CAT = '{0}--([a-zA-Z]+)_(\d{{1,2}})'
 RE_PATTERN = '^\s*' + RE_CAT + '(.*?){0}--END'
 RE_BONUS_PATTERN = '^\s*{0}--(?:bonus|BONUS)_(\d{{1,2}})(.*?){0}--END'
 RE_NOTSUBM_PATTERN = '^\s*{0}--(notsubmitted|NOTSUBMITTED)'
-
-def printIgnoreExt():
-  global IGNORE_EXT
-  IGNORE_EXT = IGNORE_EXT + \
-                map(lambda x: x+'#', PY_EXT+C_EXT+IGNORE_EXT) + \
-                map(lambda x: x+'~', PY_EXT+C_EXT+IGNORE_EXT) + \
-                ['sw'+chr(a) for a in range(107,113)]
-  print('\nIgnoring extensions:')
-  print(', '.join(IGNORE_EXT + ['.(hidden)'] ))
 
 
 def regexNotSubmitted(re_notsubm_pattern, file_content):
@@ -145,46 +132,12 @@ def gradeStudent(assignment, student):
   wrote_to_student = False
   for root, dirnames, filenames in os.walk(student.getPath()):
       for filename in filenames:
-        is_python = None
-        
-        # If ends with . or no . at all, add no extension flag to file
-        filename_check_copy = filename
-
-        if not '.' in filename_check_copy:
-          filename_check_copy = filename_check_copy+'.NO_EXT'
-        elif filename_check_copy.endswith('.'):
-          filename_check_copy = filename_check_copy+'NO_EXT'
-
-        file_extension = filename_check_copy.lower().split('.')[-1]
-        if filename_check_copy.startswith('.') or file_extension in IGNORE_EXT:
-          continue
-
+        file_extension = filename.lower().split('.')[-1]
         if file_extension in C_EXT:
-          is_python = False
+          if parseFile(root, filename, assignment, student, False):
+            wrote_to_student = True
         elif file_extension in PY_EXT:
-          is_python = True
-        elif file_extension in assignment.getSkipExts() or filename in assignment.getSkipFiles():
-          continue
-
-        # unknown extension. Prompt user what to do
-        else:
-          while(is_python is None):
-            file_ext = raw_input('\t{0:<30}{1:<30}\n\t{2:<30}{3:<30}\n\t{4:<29}'.format('File:','...'+filename_check_copy[max(len(filename_check_copy)-20,0):], 'Unknown extension:', '.'+file_extension, '\'py\'/\'c\'/\'e\'/\'f\'/\'\':'))
-            if file_ext.strip() == '':
-              break
-            elif file_ext.strip() == 'e':
-              if file_extension != 'no_ext':
-                assignment.skipExt(file_extension)
-              break
-            elif file_ext.strip() == 'f':
-              assignment.skipFile(filename)
-              break              
-            elif file_ext.strip().lower() == 'py':
-              is_python = True
-            elif file_ext.strip().lower() == 'c':
-              is_python = False
-        if is_python is not None:
-          if parseFile(root, filename, assignment, student, is_python):
+          if parseFile(root, filename, assignment, student, True):
             wrote_to_student = True
 
   if not wrote_to_student:
@@ -223,9 +176,7 @@ def writePlots(assignment):
     assignment.plotTADistr()
 
 
-def initialize(assignment):
-  printIgnoreExt()
-
+def initialize(assignment):  
   # create student objects and store them in assignement object
   assignment.createStudents()
 
@@ -275,11 +226,11 @@ def main(argv=sys.argv):
   hw = params['hw']
   ta_dict, sunet_to_git = getMaps(params['map_ta'])
   root_git = params['root_git']
-  min_files = int(params['min_files'])
   cat_map = getCatMap(params['categories'])
 
+
   # set-up assignment class with students
-  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw, repo_path, root_git, min_files)
+  assignment = Assignment(cat_map, ta_dict, sunet_to_git, hw, repo_path, root_git)
   initialize(assignment)
 
   # loop over students and grade!

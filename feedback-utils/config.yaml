@@ -1,17 +1,14 @@
 # Path to directory where repositories live
-repo_path: /afs/ir/class/cme211/git/repos_hw3/
+repo_path: /afs/ir/class/cme211/git/repos/
 
 # Categories to grade, separated by a space
 categories: "functionality-65 design-20 style-10 writeup-5"
 
 # Hw to be graded
-hw: hw3
+hw: hw1
 
 # Name of sunets-git-TA map file
-map_ta: /afs/ir/class/cme211/git/repos_hw3/TA_assignments.txt
+map_ta: /afs/ir/class/cme211/git/repos_hw1/TA_assignments.txt
 
 # Git root for creation of figs and data files
-root_git: /afs/ir/class/cme211/git/
-
-# Absolute minimum number of files to submit (the main programming files)
-min_files: 1
+root_git: /afs/ir/class/cme211/git/cme211_gradebook

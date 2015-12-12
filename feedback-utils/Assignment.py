@@ -11,7 +11,7 @@ from StringStream import StringStream
 
 
 class Assignment(object):
-  def __init__(self, category_map, ta_dict, student_git_map, hw, repository_path, root_git, min_files):
+  def __init__(self, category_map, ta_dict, student_git_map, hw, repository_path, root_git):
     self.category_map = category_map
     self.cat_list = category_map.keys()
     self.student_git_map = student_git_map
@@ -22,7 +22,6 @@ class Assignment(object):
     self.skip_files = []
     self.skip_ext = []
     self.git_root = root_git
-    self.min_files = min_files
 
     # contains only students' scores > 0 for plotting purposes
     self.ta_scores_list = []
@@ -32,9 +31,6 @@ class Assignment(object):
 
   def getCatMap(self):
     return self.category_map
-
-  def getMinFiles(self):
-    return self.min_files
 
   def createStudents(self):
     self.students = [Student(sunet, git, self.repo_path, self.hw, copy.deepcopy(self.category_map)) \
@@ -107,9 +103,9 @@ class Assignment(object):
           print('{0:<20}{1:<20}{2:<20}'.format('Not submitted:',student.getSunet(), student.getGit()))
           self.notSubmitted.append(student.getSunet())
           student.subtractAll()
-        elif len(files) <= self.min_files:
+        elif len(files) < 2:
           while True:
-            input = raw_input('WARNING! {0}, ({1}-submit) only has files \'{2}\'.\nIs this correct? Enter \'n\' to declare as not submitted. Otherwise \'y\': '.format(student.getSunet(), student.getGit(), ', '.join(files)))
+            input = raw_input('WARNING! {0}, ({1}-submit) only has file(s) \'{2}\'.\nIs this correct? Enter \'n\' to declare as not submitted. Otherwise \'y\': '.format(student.getSunet(), student.getGit(), ', '.join(files)))
             if input.strip() == 'n':
               self.notSubmitted.append(student.getSunet())
               student.subtractAll()
